@@ -1,9 +1,9 @@
-# phpstandard/library
+# phpstandard/container
 
-Skeleton to create a composer library
+PHP Dependency Container. PSR-11 implementation.
 
 ## Installation
 
 ```bash
-composer create-project phpstandard/library
+composer require phpstandard/container
 ```

@@ -1,11 +1,11 @@
 {
-    "name": "phpstandard/library",
-    "description": "Skeleton to create a composer library",
-    "type": "project",
+    "name": "phpstandard/container",
+    "description": "PHP Dependency Container. PSR-11 implementation.",
+    "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "PhpStandard\\PackageNamespace\\": "src/"
+            "PhpStandard\\Container\\": "src/"
         }
     },
     "authors": [

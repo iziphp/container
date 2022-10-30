@@ -9,10 +9,6 @@ and this project adheres to [Semantic Versioning].
 
 - /
 
-## [1.0.0] - 2022-10-30
-
-- initial release
-
 <!-- Links -->
 
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
@@ -20,5 +16,4 @@ and this project adheres to [Semantic Versioning].
 
 <!-- Versions -->
 
-[unreleased]: https://github.com/phpstandard/library/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/phpstandard/library/releases/tag/v1.0.0
+[unreleased]: https://github.com/phpstandard/container/compare/...HEAD
