@@ -12,17 +12,17 @@ use Throwable;
 class NotFoundException extends Exception implements NotFoundExceptionInterface
 {
     /**
-     * @param string $id
+     * @param string $abstract
      * @param int $code
      * @param null|Throwable $previous
      * @return void
      */
     public function __construct(
-        string $id,
+        string $abstract,
         int $code = 0,
         ?Throwable $previous = null
     ) {
-        $message = "An entry with an id of {$id} is not registered";
+        $message = "An entry with an id of {$abstract} is not registered";
         parent::__construct($message, $code, $previous);
     }
 }

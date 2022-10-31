@@ -28,11 +28,16 @@ class Container implements ContainerInterface
     }
 
     /**
+     * @SuppressWarnings(PHPMD.ShortVariable)
      * @inheritDoc
      */
     public function get(string $id)
     {
         try {
+            if ($this->configurator->isResolved($id)) {
+                return $this->configurator->getResolved($id);
+            }
+
             return $this->resolve($id);
         } catch (Throwable $th) {
             if (!$this->has($id)) {
@@ -44,6 +49,7 @@ class Container implements ContainerInterface
     }
 
     /**
+     * @SuppressWarnings(PHPMD.ShortVariable)
      * @inheritDoc
      */
     public function has(string $id): bool
@@ -94,25 +100,21 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $id
+     * @param string $abstract
      * @return mixed
      * @throws ContainerException
      * @throws ReflectionException
      * @throws NotFoundException
      * @throws Throwable
      */
-    private function resolve(string $id): mixed
+    private function resolve(string $abstract): mixed
     {
-        if ($this->configurator->isResolved($id)) {
-            return $this->configurator->getResolved($id);
-        }
+        $isShared = $this->configurator->isShared($abstract);
+        $isDefined = $this->configurator->hasDefition($abstract);
 
-        $isShared = $this->configurator->isShared($id);
-        $isDefined = $this->configurator->hasDefition($id);
-
-        $entry = $id;
+        $entry = $abstract;
         if ($isDefined) {
-            $entry = $this->configurator->getDefinition($id);
+            $entry = $this->configurator->getDefinition($abstract);
 
             if (is_object($entry)) {
                 return $entry;
@@ -132,17 +134,17 @@ class Container implements ContainerInterface
             $reflector = $this->getReflector($entry);
         } catch (Throwable $th) {
             if ($isDefined) {
-                return $this->configurator->getDefinition($id);
+                return $this->configurator->getDefinition($abstract);
             }
 
-            throw new ContainerException("{$id} is not resolvable", 0, $th);
+            throw new ContainerException("{$abstract} is not resolvable", 0, $th);
         }
 
         $instance = $this->getInstance($reflector);
 
         if ($isShared || !$isDefined) {
             // Save shared or autowired instances to resolved cache
-            $this->configurator->setResolved($id, $instance);
+            $this->configurator->setResolved($abstract, $instance);
         }
 
         return $instance;
