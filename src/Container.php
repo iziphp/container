@@ -19,12 +19,32 @@ use Throwable;
 class Container implements ContainerInterface
 {
     /**
-     * @param Configurator $configurator
-     * @return void
+     * Registered definitions
+     * @var array<string,mixed>
      */
-    public function __construct(
-        private Configurator $configurator,
-    ) {
+    private array $definitions = [];
+
+    /**
+     * Identifier for the registered shared (singleton) services
+     * @var array<string,mixed>
+     */
+    private array $shared = [];
+
+    /**
+     * Resolved shared services
+     * @var array<string,mixed>
+     */
+    private array $resolved = [];
+
+    /** @return void  */
+    public function __construct()
+    {
+        $this
+            ->set(ContainerInterface::class, $this)
+            ->set(Container::class, $this);
+
+        $this->resolved[ContainerInterface::class] = $this;
+        $this->resolved[Container::class] = $this;
     }
 
     /**
@@ -34,8 +54,8 @@ class Container implements ContainerInterface
     public function get(string $id)
     {
         try {
-            if ($this->configurator->isResolved($id)) {
-                return $this->configurator->getResolved($id);
+            if (isset($this->resolved[$id])) {
+                return $this->resolved[$id];
             }
 
             return $this->resolve($id);
@@ -54,7 +74,7 @@ class Container implements ContainerInterface
      */
     public function has(string $id): bool
     {
-        if ($this->configurator->hasDefition($id)) {
+        if (isset($this->definitions[$id])) {
             return true;
         }
 
@@ -68,6 +88,45 @@ class Container implements ContainerInterface
     }
 
     /**
+     * @param string $abstract
+     * @param mixed $concrete
+     * @return Container
+     */
+    public function set(
+        string $abstract,
+        mixed $concrete = null
+    ): self {
+        if (is_null($concrete)) {
+            $concrete = $abstract;
+        }
+
+        $this->definitions[$abstract] = $concrete;
+        return $this;
+    }
+
+    /**
+     * @param string $abstract
+     * @param mixed $concrete
+     * @return Container
+     */
+    public function setShared(
+        string $abstract,
+        mixed $concrete = null
+    ): self {
+        if (is_null($concrete)) {
+            $concrete = $abstract;
+        }
+
+        $this->definitions[$abstract] = $concrete;
+
+        if (!isset($this->shared[$abstract])) {
+            $this->shared[$abstract] = true;
+        }
+
+        return $this;
+    }
+
+    /**
      * @param string|object $instance
      * @param string $methodName
      * @return mixed
@@ -76,7 +135,7 @@ class Container implements ContainerInterface
      * @throws ContainerException
      * @throws ReflectionException
      */
-    public function callMehtod(
+    public function callMethod(
         string|object $instance,
         string $methodName
     ): mixed {
@@ -109,12 +168,12 @@ class Container implements ContainerInterface
      */
     private function resolve(string $abstract): mixed
     {
-        $isShared = $this->configurator->isShared($abstract);
-        $isDefined = $this->configurator->hasDefition($abstract);
+        $isShared = isset($this->shared[$abstract]);
+        $isDefined = isset($this->definitions[$abstract]);
 
         $entry = $abstract;
         if ($isDefined) {
-            $entry = $this->configurator->getDefinition($abstract);
+            $entry = $this->definitions[$abstract];
 
             if (is_object($entry)) {
                 return $entry;
@@ -132,19 +191,18 @@ class Container implements ContainerInterface
 
         try {
             $reflector = $this->getReflector($entry);
+            $instance = $this->getInstance($reflector);
         } catch (Throwable $th) {
             if ($isDefined) {
-                return $this->configurator->getDefinition($abstract);
+                return $this->definitions[$abstract];
             }
 
             throw new ContainerException("{$abstract} is not resolvable", 0, $th);
         }
 
-        $instance = $this->getInstance($reflector);
-
         if ($isShared || !$isDefined) {
             // Save shared or autowired instances to resolved cache
-            $this->configurator->setResolved($abstract, $instance);
+            $this->resolved[$abstract] = $instance;
         }
 
         return $instance;
@@ -222,6 +280,10 @@ class Container implements ContainerInterface
      */
     private function resolveParameter(ReflectionParameter $parameter)
     {
+        if ($this->has($parameter->name)) {
+            return $this->get($parameter->name);
+        }
+
         $type = $parameter->getType();
 
         if ($type !== null) {
@@ -240,6 +302,6 @@ class Container implements ContainerInterface
             return null;
         }
 
-        throw new ContainerException("{$parameter->name} can't be instatiated and yet has no default value");
+        throw new ContainerException("Parameter \"{$type->getName()} \${$parameter->name}\" can't be instatiated and yet has no default value");
     }
 }
