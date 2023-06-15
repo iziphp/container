@@ -299,6 +299,8 @@ class Container implements ContainerInterface
             return null;
         }
 
-        throw new ContainerException("Parameter \"{$type->getName()} \${$parameter->name}\" can't be instatiated and yet has no default value");
+        throw new ContainerException(
+            "Parameter \"{$type->getName()} \${$parameter->name}\" can't be instatiated and yet has no default value"
+        );
     }
 }
