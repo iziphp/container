@@ -4,194 +4,145 @@ declare(strict_types=1);
 
 namespace PhpStandard\Container\Tests;
 
-use DateTime;
-use PhpStandard\Container\Configurator;
 use PhpStandard\Container\Container;
+use PhpStandard\Container\Exceptions\ContainerException;
 use PhpStandard\Container\Exceptions\NotFoundException;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
+use Throwable;
 use SebastianBergmann\RecursionContext\InvalidArgumentException;
 
 /** @package PhpStandard\Container\Tests */
 class ContainerTest extends TestCase
 {
-    private static Configurator $configurator;
-    private static ContainerInterface $container;
-
-    public static function setUpBeforeClass(): void
-    {
-        self::$configurator = new Configurator();
-        self::$container = new Container(self::$configurator);
-    }
-
     /**
-     * @test
      * @return void 
-     * @throws InvalidArgumentException 
-     * @throws ExpectationFailedException 
-     */
-    public function canAutowireInterface()
-    {
-        $this->assertTrue(self::$container->has(FooInterface::class));
-    }
-
-    /**
-     * @test
-     * @return void 
-     * @throws InvalidArgumentException 
-     * @throws ExpectationFailedException 
-     */
-    public function canAutowireClass()
-    {
-        $this->assertTrue(self::$container->has(Foo::class));
-    }
-
-    /**
-     * @test
-     * @return void 
-     * @throws InvalidArgumentException 
-     * @throws ExpectationFailedException 
-     */
-    public function canAutowireBuiltinClass()
-    {
-        $this->assertTrue(self::$container->has(DateTime::class));
-    }
-
-    /**
-     * @test
-     * @return void 
-     * @throws InvalidArgumentException 
-     * @throws ExpectationFailedException 
-     */
-    public function canCheckDefinitions()
-    {
-        $abstract = uniqid();
-        $concrete = uniqid();
-
-        self::$configurator->set($abstract, $concrete);
-        $this->assertTrue(self::$container->has($abstract));
-    }
-
-    /**
-     * @test
-     * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
+     * @throws NotFoundException 
+     * @throws Throwable 
      * @throws InvalidArgumentException 
      * @throws Exception 
      * @throws ExpectationFailedException 
      */
-    public function canResolveBuiltinClasses()
+    public function testGetReturnsInstanceOfRequestedClass(): void
     {
-        $this->assertInstanceOf(
-            DateTime::class,
-            self::$container->get(DateTime::class)
-        );
+        $container = new Container();
+        $container->set('foo', Foo::class);
+
+        $foo = $container->get('foo');
+
+        $this->assertInstanceOf(Foo::class, $foo);
     }
 
     /**
-     * @test
      * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws ExpectationFailedException 
+     * @throws NotFoundException 
+     * @throws Throwable 
      */
-    public function canResolveConcreteClass()
+    public function testGetThrowsNotFoundExceptionForUnknownIdentifier(): void
     {
-        $this->assertInstanceOf(
-            Foo::class,
-            self::$container->get(Foo::class)
-        );
-    }
+        $container = new Container();
 
-    /**
-     * @test
-     * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws ExpectationFailedException 
-     */
-    public function canResolveByAbstract()
-    {
-        self::$configurator->set(FooInterface::class, Foo::class);
-        $this->assertInstanceOf(
-            Foo::class,
-            self::$container->get(FooInterface::class)
-        );
-    }
-
-    /**
-     * @test
-     * @depends canResolveByAbstract
-     * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws ExpectationFailedException 
-     */
-    public function canInjectAbstract()
-    {
-        $this->assertInstanceOf(
-            Baz::class,
-            self::$container->get(Baz::class)
-        );
-    }
-
-    /**
-     * @test
-     * @depends canResolveByAbstract
-     * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws ExpectationFailedException 
-     */
-    public function canInjectDefaultValue()
-    {
-        $this->assertInstanceOf(
-            Qux::class,
-            self::$container->get(Qux::class)
-        );
-    }
-
-    /**
-     * @test
-     * @depends canResolveByAbstract
-     * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws ExpectationFailedException 
-     */
-    public function canInjectNullValue()
-    {
-        $this->assertInstanceOf(
-            Quux::class,
-            self::$container->get(Quux::class)
-        );
-    }
-
-    /**
-     * @test
-     * @depends canResolveByAbstract
-     * @return void 
-     * @throws NotFoundExceptionInterface 
-     * @throws ContainerExceptionInterface 
-     */
-    public function canThrowNotFoundException()
-    {
         $this->expectException(NotFoundException::class);
-        self::$container->get(uniqid());
+
+        $container->get('unknown');
+    }
+
+    /**
+     * @return void 
+     * @throws InvalidArgumentException 
+     * @throws ExpectationFailedException 
+     */
+    public function testHasReturnsTrueForRegisteredIdentifier(): void
+    {
+        $container = new Container();
+        $container->set('foo', Foo::class);
+
+        $this->assertTrue($container->has('foo'));
+    }
+
+    /**
+     * @return void 
+     * @throws InvalidArgumentException 
+     * @throws ExpectationFailedException 
+     */
+    public function testHasReturnsFalseForUnknownIdentifier(): void
+    {
+        $container = new Container();
+
+        $this->assertFalse($container->has('unknown'));
+    }
+
+    /**
+     * @return void 
+     * @throws NotFoundException 
+     * @throws Throwable 
+     * @throws InvalidArgumentException 
+     * @throws Exception 
+     * @throws ExpectationFailedException 
+     */
+    public function testSetSharedRegistersSharedInstance(): void
+    {
+        $container = new Container();
+        $container->setShared('shared', Shared::class);
+
+        $shared1 = $container->get('shared');
+        $shared2 = $container->get('shared');
+
+        $this->assertInstanceOf(Shared::class, $shared1);
+        $this->assertSame($shared1, $shared2);
+    }
+
+    /**
+     * @return void 
+     * @throws NotFoundException 
+     * @throws Throwable 
+     * @throws ContainerException 
+     * @throws ReflectionException 
+     * @throws InvalidArgumentException 
+     * @throws ExpectationFailedException 
+     */
+    public function testCallMethodInvokesMethodOnInstance(): void
+    {
+        $container = new Container();
+        $container->set('foo', Foo::class);
+
+        $result = $container->callMethod('foo', 'bar');
+
+        $this->assertSame('Hello, World!', $result);
+    }
+
+    /**
+     * @return void 
+     * @throws NotFoundException 
+     * @throws Throwable 
+     * @throws ContainerException 
+     * @throws ReflectionException 
+     */
+    public function testCallMethodThrowsNotFoundExceptionForUnknownInstance(): void
+    {
+        $container = new Container();
+
+        $this->expectException(NotFoundException::class);
+
+        $container->callMethod('unknown', 'bar');
+    }
+
+    /**
+     * @return void 
+     * @throws NotFoundException 
+     * @throws Throwable 
+     * @throws ContainerException 
+     * @throws ReflectionException 
+     */
+    public function testCallMethodThrowsContainerExceptionForInvalidMethod(): void
+    {
+        $container = new Container();
+        $container->set('invalid', Invalid::class);
+
+        $this->expectException(ContainerException::class);
+
+        $container->callMethod('invalid', 'invalidMethod');
     }
 }

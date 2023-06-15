@@ -5,6 +5,6 @@ declare(strict_types=1);
 namespace PhpStandard\Container\Tests;
 
 /** @package PhpStandard\Container\Tests */
-interface FooInterface
+class Shared
 {
 }
