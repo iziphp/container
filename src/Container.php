@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpStandard\Container;
 
 use Closure;
+use PhpStandard\Container\Attributes\Inject;
 use PhpStandard\Container\Exceptions\ContainerException;
 use PhpStandard\Container\Exceptions\NotFoundException;
 use Psr\Container\ContainerInterface;
@@ -15,7 +16,10 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use Throwable;
 
-/** @package PhpStandard\Container */
+/**
+ * @package PhpStandard\Container
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class Container implements ContainerInterface
 {
     /**
@@ -274,15 +278,12 @@ class Container implements ContainerInterface
      * @throws Throwable
      * @throws ReflectionException
      * @throws ContainerException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function resolveParameter(ReflectionParameter $parameter)
     {
-        if ($this->has($parameter->name)) {
-            return $this->get($parameter->name);
-        }
-
+        // Try resolving by type
         $type = $parameter->getType();
-
         if ($type !== null) {
             assert($type instanceof ReflectionNamedType);
 
@@ -291,14 +292,31 @@ class Container implements ContainerInterface
             }
         }
 
+        // Try resolving by attribute
+        foreach ($parameter->getAttributes(Inject::class) as $attribute) {
+            $attribute = $attribute->newInstance();
+
+            if (is_string($attribute->abstract) && $this->has($attribute->abstract)) {
+                return $this->get($attribute->abstract);
+            }
+        }
+
+        // Try resolving by name
+        if ($this->has($parameter->name)) {
+            return $this->get($parameter->name);
+        }
+
+        // Try resolving by default value
         if ($parameter->isDefaultValueAvailable()) {
             return $parameter->getDefaultValue();
         }
 
+        // Try resolving by nullable type
         if ($parameter->allowsNull()) {
             return null;
         }
 
+        // Give up
         throw new ContainerException(
             "Parameter \"{$type->getName()} \${$parameter->name}\" can't be instatiated and yet has no default value"
         );

@@ -12,7 +12,7 @@ use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Throwable;
-use SebastianBergmann\RecursionContext\InvalidArgumentException;
+use InvalidArgumentException;
 
 /** @package PhpStandard\Container\Tests */
 class ContainerTest extends TestCase
@@ -144,5 +144,14 @@ class ContainerTest extends TestCase
         $this->expectException(ContainerException::class);
 
         $container->callMethod('invalid', 'invalidMethod');
+    }
+
+    public function testResolveByInjectAttribute(): void
+    {
+        $container = new Container();
+        $container->set('injected_primitive_value', 'Hello, World!');
+
+        $bar = $container->get(Bar::class);
+        $this->assertSame('Hello, World!', $bar->primitive);
     }
 }
