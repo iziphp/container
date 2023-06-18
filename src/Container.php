@@ -303,7 +303,7 @@ class Container implements ContainerInterface
         }
 
         // Try resolving by name
-        if ($this->has($parameter->name)) {
+        if (array_key_exists($parameter->name, $this->definitions)) {
             return $this->get($parameter->name);
         }
 
