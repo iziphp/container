@@ -78,17 +78,17 @@ class Container implements ContainerInterface
      */
     public function has(string $id): bool
     {
-        if (isset($this->definitions[$id])) {
+        if (array_key_exists($id, $this->definitions)) {
             return true;
         }
 
         try {
-            $this->getReflector($id);
+            $reflector = $this->getReflector($id);
         } catch (Throwable $th) {
             return false;
         }
 
-        return true;
+        return $reflector->isInstantiable();
     }
 
     /**
@@ -284,6 +284,7 @@ class Container implements ContainerInterface
     {
         // Try resolving by type
         $type = $parameter->getType();
+
         if ($type !== null) {
             assert($type instanceof ReflectionNamedType);
 
