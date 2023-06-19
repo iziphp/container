@@ -78,26 +78,6 @@ class ContainerTest extends TestCase
      * @return void 
      * @throws NotFoundException 
      * @throws Throwable 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws ExpectationFailedException 
-     */
-    public function testSetSharedRegistersSharedInstance(): void
-    {
-        $container = new Container();
-        $container->setShared('shared', Shared::class);
-
-        $shared1 = $container->get('shared');
-        $shared2 = $container->get('shared');
-
-        $this->assertInstanceOf(Shared::class, $shared1);
-        $this->assertSame($shared1, $shared2);
-    }
-
-    /**
-     * @return void 
-     * @throws NotFoundException 
-     * @throws Throwable 
      * @throws ContainerException 
      * @throws ReflectionException 
      * @throws InvalidArgumentException 

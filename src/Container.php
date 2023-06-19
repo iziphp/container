@@ -29,12 +29,6 @@ class Container implements ContainerInterface
     private array $definitions = [];
 
     /**
-     * Identifier for the registered shared (singleton) services
-     * @var array<string,mixed>
-     */
-    private array $shared = [];
-
-    /**
      * Resolved shared services
      * @var array<string,mixed>
      */
@@ -109,28 +103,6 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string $abstract
-     * @param mixed $concrete
-     * @return Container
-     */
-    public function setShared(
-        string $abstract,
-        mixed $concrete = null
-    ): self {
-        if (is_null($concrete)) {
-            $concrete = $abstract;
-        }
-
-        $this->definitions[$abstract] = $concrete;
-
-        if (!isset($this->shared[$abstract])) {
-            $this->shared[$abstract] = true;
-        }
-
-        return $this;
-    }
-
-    /**
      * @param string|object $instance
      * @param string $methodName
      * @return mixed
@@ -166,16 +138,12 @@ class Container implements ContainerInterface
      * @param string $abstract
      * @return mixed
      * @throws ContainerException
-     * @throws ReflectionException
-     * @throws NotFoundException
-     * @throws Throwable
      */
     private function resolve(string $abstract): mixed
     {
-        $isShared = isset($this->shared[$abstract]);
         $isDefined = isset($this->definitions[$abstract]);
-
         $entry = $abstract;
+
         if ($isDefined) {
             $entry = $this->definitions[$abstract];
 
@@ -191,6 +159,10 @@ class Container implements ContainerInterface
             if (is_callable($entry)) {
                 return $entry();
             }
+
+            if (is_string($entry) && isset($this->resolved[$entry])) {
+                return $this->resolved[$entry];
+            }
         }
 
         try {
@@ -204,11 +176,8 @@ class Container implements ContainerInterface
             throw new ContainerException("{$abstract} is not resolvable", 0, $th);
         }
 
-        if ($isShared || !$isDefined) {
-            // Save shared or autowired instances to resolved cache
-            $this->resolved[$abstract] = $instance;
-        }
-
+        // Save resolved cache
+        $this->resolved[$abstract] = $instance;
         return $instance;
     }
 
