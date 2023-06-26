@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PhpStandard">
-    <description>The coding standard for PhpStandard.</description>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="IziPHP">
+    <description>The coding standard for IziPHP.</description>
 
     <file>src</file>
 

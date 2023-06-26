@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PhpStandard\Container\Tests;
+namespace Easy\Container\Tests;
 
-use PhpStandard\Container\Attributes\Inject;
+use Easy\Container\Attributes\Inject;
 
+/** @package Easy\Container\Tests */
 class Bar
 {
     public function __construct(

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace PhpStandard\Container\Exceptions;
+namespace Easy\Container\Exceptions;
 
 use Exception;
 use Psr\Container\NotFoundExceptionInterface;
 use Throwable;
 
-/** @package Framework\Container\Exceptions */
+/** @package Easy\Container\Exceptions */
 class NotFoundException extends Exception implements NotFoundExceptionInterface
 {
     /**

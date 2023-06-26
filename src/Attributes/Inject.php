@@ -1,9 +1,10 @@
 <?php
 
-namespace PhpStandard\Container\Attributes;
+namespace Easy\Container\Attributes;
 
 use Attribute;
 
+/** @package Easy\Container\Attributes */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class Inject
 {

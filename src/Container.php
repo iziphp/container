@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace PhpStandard\Container;
+namespace Easy\Container;
 
 use Closure;
-use PhpStandard\Container\Attributes\Inject;
-use PhpStandard\Container\Exceptions\ContainerException;
-use PhpStandard\Container\Exceptions\NotFoundException;
+use Easy\Container\Attributes\Inject;
+use Easy\Container\Exceptions\ContainerException;
+use Easy\Container\Exceptions\NotFoundException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -17,7 +17,7 @@ use ReflectionParameter;
 use Throwable;
 
 /**
- * @package PhpStandard\Container
+ * @package Easy\Container
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Container implements ContainerInterface
@@ -173,7 +173,11 @@ class Container implements ContainerInterface
                 return $this->definitions[$abstract];
             }
 
-            throw new ContainerException("{$abstract} is not resolvable", 0, $th);
+            throw new ContainerException(
+                "{$abstract} is not resolvable",
+                0,
+                $th
+            );
         }
 
         // Save resolved cache
@@ -266,7 +270,10 @@ class Container implements ContainerInterface
         foreach ($parameter->getAttributes(Inject::class) as $attribute) {
             $attribute = $attribute->newInstance();
 
-            if (is_string($attribute->abstract) && $this->has($attribute->abstract)) {
+            if (
+                is_string($attribute->abstract)
+                && $this->has($attribute->abstract)
+            ) {
                 return $this->get($attribute->abstract);
             }
         }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PhpStandard\Container\Tests;
+namespace Easy\Container\Tests;
 
-/** @package PhpStandard\Container\Tests */
+/** @package Easy\Container\Tests */
 class Invalid
 {
 }

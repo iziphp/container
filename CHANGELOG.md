@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning].
 
 - /
 
-## [1.0.0] - 2022-10-31
+## [1.0.0] - 2023-06-26
 
 - initial release
 
@@ -20,5 +20,5 @@ and this project adheres to [Semantic Versioning].
 
 <!-- Versions -->
 
-[unreleased]: https://github.com/phpstandard/container/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/phpstandard/container/releases/tag/v1.0.0
+[unreleased]: https://github.com/iziphp/container/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/iziphp/container/releases/tag/v1.0.0

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PhpStandard\Container\Tests;
+namespace Easy\Container\Tests;
 
-use PhpStandard\Container\Container;
-use PhpStandard\Container\Exceptions\ContainerException;
-use PhpStandard\Container\Exceptions\NotFoundException;
+use Easy\Container\Container;
+use Easy\Container\Exceptions\ContainerException;
+use Easy\Container\Exceptions\NotFoundException;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
@@ -14,7 +14,7 @@ use ReflectionException;
 use Throwable;
 use InvalidArgumentException;
 
-/** @package PhpStandard\Container\Tests */
+/** @package Easy\Container\Tests */
 class ContainerTest extends TestCase
 {
     /**

@@ -1,11 +1,11 @@
 {
-    "name": "phpstandard/container",
+    "name": "iziphp/container",
     "description": "PHP Dependency Container. PSR-11 implementation.",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "PhpStandard\\Container\\": "src/"
+            "Easy\\Container\\": "src/"
         },
         "exclude-from-classmap": [
             "/tests/"
@@ -13,7 +13,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "PhpStandard\\Container\\Tests\\": "tests/"
+            "Easy\\Container\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -23,6 +23,7 @@
         }
     ],
     "require": {
+        "php": "^8.2",
         "psr/container": "^2.0"
     },
     "require-dev": {
