@@ -255,17 +255,6 @@ class Container implements ContainerInterface
      */
     private function resolveParameter(ReflectionParameter $parameter)
     {
-        // Try resolving by type
-        $type = $parameter->getType();
-
-        if ($type !== null) {
-            assert($type instanceof ReflectionNamedType);
-
-            if (!$type->isBuiltin() && $this->has($type->getName())) {
-                return $this->get($type->getName());
-            }
-        }
-
         // Try resolving by attribute
         foreach ($parameter->getAttributes(Inject::class) as $attribute) {
             $attribute = $attribute->newInstance();
@@ -275,6 +264,17 @@ class Container implements ContainerInterface
                 && $this->has($attribute->abstract)
             ) {
                 return $this->get($attribute->abstract);
+            }
+        }
+
+        // Try resolving by type
+        $type = $parameter->getType();
+
+        if ($type !== null) {
+            assert($type instanceof ReflectionNamedType);
+
+            if (!$type->isBuiltin() && $this->has($type->getName())) {
+                return $this->get($type->getName());
             }
         }
 
