@@ -20,8 +20,11 @@ use Throwable;
  * @package Easy\Container
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class Container implements ContainerInterface
+class Container implements ContainerInterface, ResolverInterface
 {
+    /** @var array<ResolverInterface> $resolvers */
+    private array $resolvers = [];
+
     /**
      * Registered definitions
      * @var array<string,mixed>
@@ -43,7 +46,20 @@ class Container implements ContainerInterface
 
         $this->resolved[ContainerInterface::class] = $this;
         $this->resolved[Container::class] = $this;
+
+        $this->pushResolver($this);
     }
+
+    /**
+     * @param ResolverInterface $resolver 
+     * @return Container 
+     */
+    public function pushResolver(ResolverInterface $resolver): self
+    {
+        $this->resolvers[] = $resolver;
+        return $this;
+    }
+
 
     /**
      * @SuppressWarnings(PHPMD.ShortVariable)
@@ -51,12 +67,27 @@ class Container implements ContainerInterface
      */
     public function get(string $id)
     {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->canResolve($id)) {
+                return $resolver->resolve($id);
+            }
+        }
+
+        throw new NotFoundException($id);
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     * @inheritDoc
+     */
+    public function resolve(string $id): mixed
+    {
         try {
             if (isset($this->resolved[$id])) {
                 return $this->resolved[$id];
             }
 
-            return $this->resolve($id);
+            return $this->doResolve($id);
         } catch (Throwable $th) {
             if (!$this->has($id)) {
                 throw new NotFoundException($id, 0, $th);
@@ -72,7 +103,25 @@ class Container implements ContainerInterface
      */
     public function has(string $id): bool
     {
-        if (array_key_exists($id, $this->definitions)) {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->canResolve($id)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     * @inheritDoc
+     */
+    public function canResolve(string $id): bool
+    {
+        if (
+            array_key_exists($id, $this->definitions)
+            || array_key_exists($id, $this->resolved)
+        ) {
             return true;
         }
 
@@ -139,7 +188,7 @@ class Container implements ContainerInterface
      * @return mixed
      * @throws ContainerException
      */
-    private function resolve(string $abstract): mixed
+    private function doResolve(string $abstract): mixed
     {
         $isDefined = isset($this->definitions[$abstract]);
         $entry = $abstract;
