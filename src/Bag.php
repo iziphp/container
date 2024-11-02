@@ -14,6 +14,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 use Throwable;
 
 /**
@@ -34,14 +35,13 @@ class Bag implements ResolverInterface
      */
     private array $resolved = [];
 
-    /**
+    /**     
      * @param ContainerInterface $container
      * @return void
      */
     public function __construct(
         private ContainerInterface $container
-    ) {
-    }
+    ) {}
 
     /**
      * @SuppressWarnings(PHPMD.ShortVariable)
@@ -241,10 +241,17 @@ class Bag implements ResolverInterface
         $type = $parameter->getType();
 
         if ($type !== null) {
-            assert($type instanceof ReflectionNamedType);
-
-            if (!$type->isBuiltin() && $this->container->has($type->getName())) {
-                return $this->container->get($type->getName());
+            if ($type instanceof ReflectionUnionType) {
+                // For union types, try to find the first resolvable type
+                foreach ($type->getTypes() as $unionType) {
+                    if (!$unionType->isBuiltin() && $this->container->has($unionType->getName())) {
+                        return $this->container->get($unionType->getName());
+                    }
+                }
+            } elseif ($type instanceof ReflectionNamedType) {
+                if (!$type->isBuiltin() && $this->container->has($type->getName())) {
+                    return $this->container->get($type->getName());
+                }
             }
         }
 
@@ -265,7 +272,7 @@ class Bag implements ResolverInterface
 
         // Give up
         throw new ContainerException(
-            "Parameter \"{$type->getName()} \${$parameter->name}\" can't be instatiated and yet has no default value"
+            "Parameter \"\${$parameter->name}\" can't be instantiated and yet has no default value"
         );
     }
 }
